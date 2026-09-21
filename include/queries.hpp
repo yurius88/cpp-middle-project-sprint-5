@@ -235,38 +235,45 @@ struct ShapeToShapeDistanceVisitor {
     }
 };
 
-
 /*
-* Функции-помощники
-*/
+ * Функции-помощники
+ */
 inline double DistanceToPoint(const Shape &shape, const Point2D &point) {
 
-    /* ваш код с PointToShapeDistanceVisitor здесь*/
-    return 0.0;
+    return std::visit(PointToShapeDistanceVisitor{point}, shape);
 }
 
 inline BoundingBox GetBoundBox(const Shape &shape) {
 
-    /* ваш код с использованием метода BoundBox() здесь */
-    return {};
+    return std::visit(Multilambda{[](const Line &line) { return line.BoundBox(); },
+                                  [](const Triangle &triangle) { return triangle.BoundBox(); },
+                                  [](const Rectangle &rectangle) { return rectangle.BoundBox(); },
+                                  [](const RegularPolygon &regularPolygon) { return regularPolygon.BoundBox(); },
+                                  [](const Circle &circle) { return circle.BoundBox(); },
+                                  [](const Polygon &polygon) { return polygon.BoundBox(); }},
+                      shape);
 }
 
 inline double GetHeight(const Shape &shape) {
 
-    /* ваш код с использованием метода Height() здесь */
-    return 0.0;
+    return std::visit(Multilambda{[](const Line &line) { return line.Height(); },
+                                  [](const Triangle &triangle) { return triangle.Height(); },
+                                  [](const Rectangle &rectangle) { return rectangle.Height(); },
+                                  [](const RegularPolygon &regularPolygon) { return regularPolygon.Height(); },
+                                  [](const Circle &circle) { return circle.Height(); },
+                                  [](const Polygon &polygon) { return polygon.Height(); }},
+                      shape);
 }
 
 inline bool BoundingBoxesOverlap(const Shape &shape1, const Shape &shape2) {
-   BoundingBox bb1 = GetBoundBox(shape1);
+    BoundingBox bb1 = GetBoundBox(shape1);
     BoundingBox bb2 = GetBoundBox(shape2);
     return bb1.Overlaps(bb2);
 }
 
-std::optional<double> DistanceBetweenShapes(const Shape &shape1, const Shape &shape2) {
+inline std::optional<double> DistanceBetweenShapes(const Shape &shape1, const Shape &shape2) {
 
-    /* ваш код с ShapeToShapeDistanceVisitor здесь*/
-    return std::nullopt;
+    return std::visit(ShapeToShapeDistanceVisitor{}, shape1, shape2);
 }
 
 }  // namespace geometry::queries
